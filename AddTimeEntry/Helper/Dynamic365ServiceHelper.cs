@@ -15,8 +15,8 @@ namespace AddTimeEntry.Helper
             IOrganizationService service = null;
             try
             {
-                var connectionString = GetConnectionStringFromAppConfig("Connect");
-                if (string.IsNullOrEmpty(connectionString)) throw new Exception("There's No Connection String");
+                var connectionString = GetConnectionStringFromAppConfig("Connect", log);
+                if (string.IsNullOrEmpty(connectionString)) return null;
 
                 var svc = new CrmServiceClient(connectionString);
                 service = svc.OrganizationWebProxyClient ?? (IOrganizationService)svc.OrganizationServiceProxy;
@@ -38,12 +38,12 @@ namespace AddTimeEntry.Helper
             }
             catch (Exception ex)
             {
-                log.Error(ex.Message);
+                log.Error("Cannot create crm service client, please check your connection string", ex);
                 return service;
             }
         }
 
-        private static string GetConnectionStringFromAppConfig(string name)
+        private static string GetConnectionStringFromAppConfig(string name, TraceWriter log)
         {
             try
             {
@@ -63,9 +63,9 @@ namespace AddTimeEntry.Helper
                        "LoginPrompt=Never;";
                 // return ConfigurationManager.ConnectionStrings[name].ConnectionString;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("You can set connection data in cds/App.config before running this sample. - Switching to Interactive Mode");
+                log.Error("You can set connection data in cds/App.config before running this sample. - Switching to Interactive Mode", e);
                 return string.Empty;
             }
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -9,11 +10,19 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace AddTimeEntry
 {
     public static class AddTimeEntry
     {
+        private const string MsdynTimeentry = "msdyn_timeentry";
+        private const string MsdynStart = "msdyn_start";
+        private const string MsdynEnd = "msdyn_end";
+        private const string MsdynDuration = "msdyn_duration";
+        private const string MsdynDescription = "msdyn_description";
+        private const string MsdynTimeentryid = "msdyn_timeentryid";
+
         [FunctionName("AddTimeEntry")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequestMessage req, 
@@ -39,6 +48,11 @@ namespace AddTimeEntry
             }
 
             var serviceClient = Dynamic365ServiceHelper.ConnectToService(log);
+            if (serviceClient == null)
+            {
+                return req.CreateResponse(HttpStatusCode.InternalServerError, "Azure function can't access Dynamic365 Service");
+            }
+
             var result = CreateTimeEntries(serviceClient, startOnDate, endOnDate, log);
             return result ? req.CreateResponse(HttpStatusCode.OK, "Done") : req.CreateResponse(HttpStatusCode.InternalServerError);
         }
@@ -47,13 +61,19 @@ namespace AddTimeEntry
         {
             try
             {
+                log.Info("Retrieving old time entries to ensure no duplicates in data.");
+                var oldDates = GetOldDates(service);
+
                 for (var temp = startOn; temp <= endOn; temp = temp.AddDays(1))
                 {
-                    var timeEntry = new Entity("msdyn_timeentry")
+                    if (oldDates.Any(r => r == temp)) continue;
+
+                    var timeEntry = new Entity(MsdynTimeentry)
                     {
-                        ["msdyn_start"] = temp.DateTime,
-                        ["msdyn_end"] = temp.DateTime,
-                        ["msdyn_duration"] = 0,
+                        [MsdynStart] = temp.DateTime,
+                        [MsdynEnd] = temp.DateTime,
+                        [MsdynDuration] = 0,
+                        [MsdynDescription] = "Test Time Entry"
                     };
 
                     var timeEntryId = service.Create(timeEntry);
@@ -67,6 +87,17 @@ namespace AddTimeEntry
                 log.Error(e.Message, e);
                 return false;
             }
+        }
+
+        private static List<DateTime> GetOldDates(IOrganizationService service)
+        {
+            var oldEntities = service.RetrieveMultiple(new QueryExpression(MsdynTimeentry));
+            var oldDates = oldEntities?.Entities?.Select(r =>
+            {
+                var entity = service.Retrieve(r.LogicalName, (Guid) r[MsdynTimeentryid], new ColumnSet(MsdynStart));
+                return DateTime.Parse(entity[MsdynStart].ToString());
+            }).ToList();
+            return oldDates;
         }
     }
 }
