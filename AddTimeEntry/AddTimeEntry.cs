@@ -77,7 +77,7 @@ namespace AddTimeEntry
                     };
 
                     var timeEntryId = service.Create(timeEntry);
-                    log.Info($"Created {timeEntry.LogicalName} entity Id {timeEntryId}.");
+                    log.Info($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
                 }
 
                 return true;

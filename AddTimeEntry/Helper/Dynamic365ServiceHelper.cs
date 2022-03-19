@@ -27,6 +27,7 @@ namespace AddTimeEntry.Helper
                     if (userid != Guid.Empty)
                     {
                         log.Info("Connection Established Successfully...");
+                        log.Info($" UserId: {userid}");
                     }
                 }
                 else
@@ -45,29 +46,7 @@ namespace AddTimeEntry.Helper
 
         private static string GetConnectionStringFromAppConfig(string name, TraceWriter log)
         {
-            try
-            {
-                var url = "https://orge339c78a.crm4.dynamics.com";
-                var userName = "MohamedAhmed93@hosnyrent.onmicrosoft.com";
-                var password = "h@2041993@H";
-                var authType = "OAuth";
-                var appId = "51f81489-12ee-4a9e-aaae-a2591f45987d";
-                var redirectUri = "app://58145B91-0C36-4500-8554-080854F2AC97";
-
-                return $"Url = {url};" +
-                       $"AuthType = {authType};" +
-                       $"UserName = {userName};" +
-                       $"Password = {password};" +
-                       $"AppId = {appId};" +
-                       $"RedirectUri = {redirectUri};" +
-                       "LoginPrompt=Never;";
-                // return ConfigurationManager.ConnectionStrings[name].ConnectionString;
-            }
-            catch (Exception e)
-            {
-                log.Error("You can set connection data in cds/App.config before running this sample. - Switching to Interactive Mode", e);
-                return string.Empty;
-            }
+            return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
         }
     }
 }
@@ -75,12 +54,11 @@ namespace AddTimeEntry.Helper
 /*
  * <add name="Connect"
    connectionString="AuthType=OAuth; 
-   Username=jsmith@contoso.onmicrosoft.com; 
-   Url=https://contosotest.crm.dynamics.com; 
-   Password=passcode;
+   Username=MohamedAhmed93@hosnyrent.onmicrosoft.com; 
+   Url=https://orge339c78a.crm4.dynamics.com; 
+   Password=h@2041993@H;
    AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;
    RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97;
-   TokenCacheStorePath=d:\MyTokenCache;
-   LoginPrompt=Auto"/>
+   LoginPrompt=Never"/>
    </connectionStrings>
  */
