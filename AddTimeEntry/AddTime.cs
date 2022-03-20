@@ -68,12 +68,12 @@ namespace AddTime
 
         private static IEnumerable<Guid> CreateTimeEntries(IOrganizationService service, DateTimeOffset startOn, DateTimeOffset endOn, ILogger log)
         {
-            var result = new List<Guid>();
+            var result = new List<Guid>();  // return list of added entries
 
             try
             {
                 log.LogInformation("Retrieving old time entries to ensure no duplicates in data.");
-                var oldDates = GetOldDates(service);    // Get old dates to ensure there is no duplicates
+                var oldDates = RetrieveOldDates(service);    // Get old dates to ensure there is no duplicates
 
                 for (var temp = startOn; temp <= endOn; temp = temp.AddDays(1))
                 {
@@ -88,8 +88,8 @@ namespace AddTime
                     };
 
                     var timeEntryId = service.Create(timeEntry);    // Create new date in time entries
-                    log.LogInformation($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
                     result.Add(timeEntryId);
+                    log.LogInformation($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
                 }
 
                 return result;
@@ -101,7 +101,7 @@ namespace AddTime
             }
         }
 
-        private static List<DateTime> GetOldDates(IOrganizationService service)
+        private static List<DateTime> RetrieveOldDates(IOrganizationService service)
         {
             var oldEntities = service.RetrieveMultiple(new QueryExpression(MsdynTimeentry));    // Getting old entities from service
            

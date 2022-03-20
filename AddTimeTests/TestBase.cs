@@ -12,6 +12,9 @@ using NUnit.Framework;
 
 namespace AddTimeTests
 {
+    /// <summary>
+    /// Test base class to add all boilerplate code
+    /// </summary>
     public abstract class TestBase
     {
         protected ILogger Logger;
