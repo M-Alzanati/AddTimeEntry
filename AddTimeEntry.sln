@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddTimeEntry", "AddTimeEntry\AddTimeEntry.csproj", "{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddTime", "AddTimeEntry\AddTime.csproj", "{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E010F95-036D-4232-89B8-7643AC87ABD9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7DFFD5C7-C8EA-42E4-8E5D-267FFCF529CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,6 +22,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA} = {6E010F95-036D-4232-89B8-7643AC87ABD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F308E50-4AFA-435D-AF25-48D1603DF949}

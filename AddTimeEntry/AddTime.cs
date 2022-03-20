@@ -14,7 +14,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace AddTimeEntry
 {
-    public static class AddTimeEntry
+    public static class AddTime
     {
         private const string MsdynTimeentry = "msdyn_timeentry";
         private const string MsdynStart = "msdyn_start";
@@ -23,14 +23,20 @@ namespace AddTimeEntry
         private const string MsdynDescription = "msdyn_description";
         private const string MsdynTimeentryid = "msdyn_timeentryid";
 
-        [FunctionName("AddTimeEntry")]
+        /// <summary>
+        /// This function is used to create time entries in dynamics365 service
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        [FunctionName("AddTime")]
         public static async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequestMessage req, 
             TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
 
-            var data = await req.Content.ReadAsAsync<TimeEntryDataVerseDto>();
+            var data = await req.Content.ReadAsAsync<TimeEntryDataVerseDto>();  // Serialize request payload
 
             if (!DateTimeOffset.TryParse(data.StartOn, out var startOnDate))
             {
@@ -42,18 +48,18 @@ namespace AddTimeEntry
                 return req.CreateResponse(HttpStatusCode.BadRequest, "End Date Is Not Valid, Please Use This Format mm/dd/yyyy");
             }
 
-            if (startOnDate > endOnDate)
+            if (startOnDate > endOnDate)    // End date should be greater than start date
             {
                 return req.CreateResponse(HttpStatusCode.BadRequest, "End Date Should Be Greater Than Start Date");
             }
 
-            var serviceClient = Dynamic365ServiceHelper.ConnectToService(log);
+            var serviceClient = Dynamic365ServiceHelper.ConnectToService(log);  // Connect to service
             if (serviceClient == null)
             {
                 return req.CreateResponse(HttpStatusCode.InternalServerError, "Azure function can't access Dynamic365 Service");
             }
 
-            var result = CreateTimeEntries(serviceClient, startOnDate, endOnDate, log);
+            var result = CreateTimeEntries(serviceClient, startOnDate, endOnDate, log); // Create time entries 
             return result ? req.CreateResponse(HttpStatusCode.OK, "Done") : req.CreateResponse(HttpStatusCode.InternalServerError);
         }
 
@@ -62,11 +68,11 @@ namespace AddTimeEntry
             try
             {
                 log.Info("Retrieving old time entries to ensure no duplicates in data.");
-                var oldDates = GetOldDates(service);
+                var oldDates = GetOldDates(service);    // Get old dates to ensure there is no duplicates
 
                 for (var temp = startOn; temp <= endOn; temp = temp.AddDays(1))
                 {
-                    if (oldDates.Any(r => r == temp)) continue;
+                    if (oldDates.Any(r => r == temp)) continue; // Skip the new date if it was already in time entries
 
                     var timeEntry = new Entity(MsdynTimeentry)
                     {
@@ -76,7 +82,7 @@ namespace AddTimeEntry
                         [MsdynDescription] = "Test Time Entry"
                     };
 
-                    var timeEntryId = service.Create(timeEntry);
+                    var timeEntryId = service.Create(timeEntry);    // Create new date in time entries
                     log.Info($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
                 }
 
@@ -91,12 +97,14 @@ namespace AddTimeEntry
 
         private static List<DateTime> GetOldDates(IOrganizationService service)
         {
-            var oldEntities = service.RetrieveMultiple(new QueryExpression(MsdynTimeentry));
+            var oldEntities = service.RetrieveMultiple(new QueryExpression(MsdynTimeentry));    // Getting old entities from service
+           
             var oldDates = oldEntities?.Entities?.Select(r =>
             {
-                var entity = service.Retrieve(r.LogicalName, (Guid) r[MsdynTimeentryid], new ColumnSet(MsdynStart));
+                var entity = service.Retrieve(r.LogicalName, (Guid) r[MsdynTimeentryid], new ColumnSet(MsdynStart));    // Get start date because start_date == end_date
                 return DateTime.Parse(entity[MsdynStart].ToString());
             }).ToList();
+
             return oldDates;
         }
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Configuration;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
@@ -15,19 +14,19 @@ namespace AddTimeEntry.Helper
             IOrganizationService service = null;
             try
             {
-                var connectionString = GetConnectionStringFromAppConfig("Connect", log);
+                var connectionString = GetConnectionStringFromAppConfig("Connect", log);    // Read connection string from environment variables
                 if (string.IsNullOrEmpty(connectionString)) return null;
 
-                var svc = new CrmServiceClient(connectionString);
+                var svc = new CrmServiceClient(connectionString);   // Open a connection with service
                 service = svc.OrganizationWebProxyClient ?? (IOrganizationService)svc.OrganizationServiceProxy;
 
                 if (service != null)
                 {
-                    var userid = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).UserId;
+                    var userid = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).UserId; // Getting user_Id
                     if (userid != Guid.Empty)
                     {
                         log.Info("Connection Established Successfully...");
-                        log.Info($" UserId: {userid}");
+                        log.Info($"UserId: {userid}");
                     }
                 }
                 else
@@ -50,15 +49,3 @@ namespace AddTimeEntry.Helper
         }
     }
 }
-
-/*
- * <add name="Connect"
-   connectionString="AuthType=OAuth; 
-   Username=MohamedAhmed93@hosnyrent.onmicrosoft.com; 
-   Url=https://orge339c78a.crm4.dynamics.com; 
-   Password=h@2041993@H;
-   AppId=51f81489-12ee-4a9e-aaae-a2591f45987d;
-   RedirectUri=app://58145B91-0C36-4500-8554-080854F2AC97;
-   LoginPrompt=Never"/>
-   </connectionStrings>
- */
