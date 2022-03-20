@@ -4,15 +4,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AddTime.Helper;
 using AddTimeEntry.DTO;
-using AddTimeEntry.Helper;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace AddTimeEntry
+namespace AddTime
 {
     public static class AddTime
     {
@@ -31,10 +31,11 @@ namespace AddTimeEntry
         /// <returns></returns>
         [FunctionName("AddTime")]
         public static async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]HttpRequestMessage req, 
-            TraceWriter log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = null)]
+            HttpRequestMessage req,
+            ILogger log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.LogInformation("C# HTTP trigger function processed a request.");
 
             var data = await req.Content.ReadAsAsync<TimeEntryDataVerseDto>();  // Serialize request payload
 
@@ -60,14 +61,18 @@ namespace AddTimeEntry
             }
 
             var result = CreateTimeEntries(serviceClient, startOnDate, endOnDate, log); // Create time entries 
-            return result ? req.CreateResponse(HttpStatusCode.OK, "Done") : req.CreateResponse(HttpStatusCode.InternalServerError);
+            return result == null
+                ? req.CreateResponse(HttpStatusCode.InternalServerError)
+                : req.CreateResponse(HttpStatusCode.OK, result);
         }
 
-        private static bool CreateTimeEntries(IOrganizationService service, DateTimeOffset startOn, DateTimeOffset endOn, TraceWriter log)
+        private static IEnumerable<Guid> CreateTimeEntries(IOrganizationService service, DateTimeOffset startOn, DateTimeOffset endOn, ILogger log)
         {
+            var result = new List<Guid>();
+
             try
             {
-                log.Info("Retrieving old time entries to ensure no duplicates in data.");
+                log.LogInformation("Retrieving old time entries to ensure no duplicates in data.");
                 var oldDates = GetOldDates(service);    // Get old dates to ensure there is no duplicates
 
                 for (var temp = startOn; temp <= endOn; temp = temp.AddDays(1))
@@ -83,15 +88,16 @@ namespace AddTimeEntry
                     };
 
                     var timeEntryId = service.Create(timeEntry);    // Create new date in time entries
-                    log.Info($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
+                    log.LogInformation($"Created {timeEntry.LogicalName} entity_Id {timeEntryId}.");
+                    result.Add(timeEntryId);
                 }
 
-                return true;
+                return result;
             }
             catch (Exception e)
             {
-                log.Error(e.Message, e);
-                return false;
+                log.LogError(e.Message, e);
+                return null;
             }
         }
 

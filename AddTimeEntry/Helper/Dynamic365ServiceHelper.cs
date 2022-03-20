@@ -1,20 +1,20 @@
 ﻿using System;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Tooling.Connector;
 
-namespace AddTimeEntry.Helper
+namespace AddTime.Helper
 {
     public static class Dynamic365ServiceHelper
     {
         public static IOrganizationService ConnectToService(
-            TraceWriter log)
+            ILogger log)
         {
             IOrganizationService service = null;
             try
             {
-                var connectionString = GetConnectionStringFromAppConfig("Connect", log);    // Read connection string from environment variables
+                var connectionString = GetConnectionStringFromAppConfig("Connect");    // Read connection string from environment variables
                 if (string.IsNullOrEmpty(connectionString)) return null;
 
                 var svc = new CrmServiceClient(connectionString);   // Open a connection with service
@@ -25,25 +25,25 @@ namespace AddTimeEntry.Helper
                     var userid = ((WhoAmIResponse)service.Execute(new WhoAmIRequest())).UserId; // Getting user_Id
                     if (userid != Guid.Empty)
                     {
-                        log.Info("Connection Established Successfully...");
-                        log.Info($"UserId: {userid}");
+                        log.LogInformation("Connection Established Successfully...");
+                        log.LogInformation($"UserId: {userid}");
                     }
                 }
                 else
                 {
-                    log.Info("Failed to Established Connection!!!");
+                    log.LogInformation("Failed to Established Connection!!!");
                 }
 
                 return service;
             }
             catch (Exception ex)
             {
-                log.Error("Cannot create crm service client, please check your connection string", ex);
+                log.LogError("Cannot create crm service client, please check your connection string", ex);
                 return service;
             }
         }
 
-        private static string GetConnectionStringFromAppConfig(string name, TraceWriter log)
+        private static string GetConnectionStringFromAppConfig(string name)
         {
             return Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
         }

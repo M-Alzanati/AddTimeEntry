@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6E010F95-036
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7DFFD5C7-C8EA-42E4-8E5D-267FFCF529CD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddTimeTests", "AddTimeTests\AddTimeTests.csproj", "{99EAE649-60DD-4626-88A9-76D4BBABE6E4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,12 +21,17 @@ Global
 		{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99EAE649-60DD-4626-88A9-76D4BBABE6E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99EAE649-60DD-4626-88A9-76D4BBABE6E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99EAE649-60DD-4626-88A9-76D4BBABE6E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99EAE649-60DD-4626-88A9-76D4BBABE6E4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DA00AABD-FFA5-472D-9F28-AE9B9C1CB8BA} = {6E010F95-036D-4232-89B8-7643AC87ABD9}
+		{99EAE649-60DD-4626-88A9-76D4BBABE6E4} = {7DFFD5C7-C8EA-42E4-8E5D-267FFCF529CD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8F308E50-4AFA-435D-AF25-48D1603DF949}
